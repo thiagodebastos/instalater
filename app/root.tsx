@@ -1,4 +1,3 @@
-import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import {
   Links,
@@ -47,7 +46,8 @@ const Document = withEmotionCache(
       });
       // reset cache to reapply global styles
       clientStyleData?.reset();
-    }, [clientStyleData, emotionCache.sheet]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <html lang="en">
@@ -63,6 +63,7 @@ const Document = withEmotionCache(
           ))}
         </head>
         <body>
+          <h1>ROOT ROUTE</h1>
           {children}
           <ScrollRestoration />
           <Scripts />
