@@ -63,7 +63,6 @@ const Document = withEmotionCache(
           ))}
         </head>
         <body>
-          <h1>ROOT ROUTE</h1>
           {children}
           <ScrollRestoration />
           <Scripts />

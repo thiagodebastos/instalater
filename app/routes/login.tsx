@@ -1,5 +1,7 @@
 import {
   Button,
+  Center,
+  Container,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -16,21 +18,22 @@ import {
   isRouteErrorResponse,
   useRouteError,
 } from "@remix-run/react";
-import { commitSession, getSession } from "~/session.server";
+import { sessionStorage } from "~/services/session.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await sessionStorage.getSession(
+    request.headers.get("Cookie")
+  );
+
+  console.log(JSON.stringify(session, null, 2));
+
   if (session.has("userId")) {
     return redirect("/dashboard");
   }
 
   const data = { error: session.get("error") };
 
-  return json(data, {
-    headers: {
-      "Set-Cookie": await commitSession(session),
-    },
-  });
+  return json(data);
 }
 
 // TODO: create validateCredentials handler
@@ -48,19 +51,23 @@ function validateCredentials(
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await sessionStorage.getSession(
+    request.headers.get("Cookie")
+  );
+  console.log(request.headers.get("Cookie"));
 
   const form = await request.formData();
   const username = form.get("username");
   const password = form.get("password");
+  let userId: string | null;
 
   try {
-    const userId = await validateCredentials(username, password);
+    userId = await validateCredentials(username, password);
     if (userId == null) {
       session.flash("error", "Invalid username/password");
       return redirect("/login", {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await sessionStorage.commitSession(session),
         },
       });
     }
@@ -68,14 +75,17 @@ export async function action({ request }: ActionFunctionArgs) {
     session.flash("error", "Invalid username/password");
     return redirect("/login", {
       headers: {
-        "Set-Cookie": await commitSession(session),
+        "Set-Cookie": await sessionStorage.commitSession(session),
       },
     });
   }
 
   return redirect("/publish", {
     headers: {
-      "Set-Cookie": await commitSession(session),
+      "Set-Cookie": await sessionStorage.commitSession({
+        ...session,
+        data: { ...session.data, userId },
+      }),
     },
   });
 }
@@ -85,9 +95,7 @@ export default function Login() {
   // const routerError = useRouteError();
 
   return (
-    <div>
-      <h1>LOGIN ROUTE</h1>
-      {error ? <div className="error">{error}</div> : null}
+    <Center h="100vh">
       <form method="POST">
         <div>
           <p>Please sign in</p>
@@ -100,10 +108,11 @@ export default function Login() {
             <FormLabel>Password</FormLabel>
             <Input type="password" name="password" />
           </FormControl>
+          {error ? <div className="error">{error}</div> : null}
           <Button type="submit">Login</Button>
         </div>
       </form>
-    </div>
+    </Center>
   );
 }
 
