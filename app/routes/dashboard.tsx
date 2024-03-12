@@ -17,13 +17,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (!session.has("userId"))
     return redirect("/login", {
       headers: {
-        // NOTE: is this necessary?
+        /* NOTE:
+         * it is good practice to destroy any sessions that may be lingering around
+         * when a user is not logged in. For example if the user leaves their browser open
+         * in this route for too long and the session expires.
+         * Security: This prevents session hijacking and unauthorized access.
+         * State Management: Ensure consistency between client and server
+         * By destroying the session here before the redirect, we ensure that the user lands
+         * back on the login page without any residual session data
+         */
         "Set-Cookie": await sessionStorage.destroySession(session),
       },
     });
 
   return {
-    userId: session.get("userId"),
+    user: session.get("userId"),
   };
 }
 
@@ -42,11 +50,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Dashboard() {
-  const { userId } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   return (
     <div>
-      <h1>Publish Route</h1>
-      <p>Logged in as: {userId}</p>
+      <h1>Dashboard</h1>
+      <p>Logged in as: {user.email}</p>
       <Form method="post">
         <Button type="submit">Log out</Button>
       </Form>

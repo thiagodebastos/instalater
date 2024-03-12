@@ -1,8 +1,9 @@
 import { createClient } from "redis";
+import { REDIS_HOST, REDIS_PORT } from "~/utils/env";
 
 const client = createClient({
-  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-  password: process.env.REDIS_PASSWORD,
+  url: `redis://${REDIS_HOST}:${REDIS_PORT}`,
+  // password: REDIS_PASSWORD, // TODO: make sure REDIS password is set
 });
 
 client.on("error", (err) => console.log("Redis client error", err));

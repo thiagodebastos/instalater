@@ -1,18 +1,21 @@
 import { createCookie, createSessionStorage } from "@remix-run/node";
 import crypto from "node:crypto";
 import redisClient from "./redis.server";
+import { SESSION_SECRET } from "~/utils/env";
 
 const client = redisClient;
 
 /**
- * The input/output to a session storage object are HTTP cookies. getSession() retrieves the current session from the incoming request's Cookie header, and commitSession()/destroySession() provide the Set-Cookie header for the outgoing response.
+ * The input/output to a session storage object are HTTP cookies.
+ * getSession() retrieves the current session from the incoming request's Cookie header,
+ * commitSession()/destroySession() provide the Set-Cookie header for the outgoing response.
  */
 const sessionCookie = createCookie("__session", {
   httpOnly: true,
   maxAge: 600,
   path: "/",
-  sameSite: "lax",
-  secrets: [process.env.SESSION_SECRET || ""], // TODO: replace this with an actual secret. Should this be generated?
+  sameSite: "strict",
+  secrets: [SESSION_SECRET],
   secure: process.env.NODE_ENV === "production",
 });
 
@@ -48,3 +51,5 @@ export const sessionStorage = createSessionStorage({
     await client.quit();
   },
 });
+
+export const { getSession, commitSession, destroySession } = sessionStorage;

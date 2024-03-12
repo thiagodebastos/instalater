@@ -26,6 +26,9 @@ module.exports = {
   overrides: [
     // React
     {
+      rules: {
+        "prefer-const": "off",
+      },
       files: ["**/*.{js,jsx,ts,tsx}"],
       plugins: ["react", "jsx-a11y"],
       extends: [
@@ -51,6 +54,9 @@ module.exports = {
 
     // Typescript
     {
+      rules: {
+        "prefer-const": "off",
+      },
       files: ["**/*.{ts,tsx}"],
       plugins: ["@typescript-eslint", "import"],
       parser: "@typescript-eslint/parser",
@@ -80,4 +86,7 @@ module.exports = {
       },
     },
   ],
+  rules: {
+    "prefer-const": "off",
+  },
 };
